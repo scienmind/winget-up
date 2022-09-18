@@ -1,40 +1,43 @@
 {
     "host_config": {
-        "My-PC-Hostname-01": {
+        "my_desktop_workstation": {
             "package_groups": [
-                "basic_apps",
-                "maintenance_tools"
+                "*" // select all package groups
             ]
         },
-        "My-PC-Hostname-03": {
-            "package_groups": [
-                "*"
-            ]
-        },
-        "My-PC-Hostname-02": {
+        "my_editing_pc": {
             "package_groups": [
                 "basic_apps",
-                "chat_tools",
-                "media_tools"
+                "editing_tools"
+            ]
+        },
+        "my_thinkpad": {
+            "package_groups": [
+                "basic_apps",
+                "communication_apps",
+                "dev_tools"
             ]
         }
     },
     "package_group_definition": {
         "basic_apps": [
-            "Mozilla.Firefox",
             "7zip.7zip",
+            "Mozilla.Firefox",
+            "TheDocumentFoundation.LibreOffice",
             "VideoLAN.VLC"
         ],
-        "maintenance_tools": [
-            "Notepad++.Notepad++"
+        "editing_tools": [
+            "Audacity.Audacity",
+            "BlenderFoundation.Blender",
+            "GIMP.GIMP"
         ],
-        "chat_tools": [
+        "dev_tools": [
+            "Git.Git",
+            "Microsoft.VisualStudioCode"
+        ],
+        "communication_apps": [
             "Jitsi.Meet",
             "OpenWhisperSystems.Signal"
-        ],
-        "media_tools": [
-            "Audacity.Audacity",
-            "GIMP.GIMP"
         ]
     }
 }
