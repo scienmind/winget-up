@@ -1,0 +1,40 @@
+{
+    "host_config": {
+        "My-PC-Hostname-01": {
+            "package_groups": [
+                "basic_apps",
+                "maintenance_tools"
+            ]
+        },
+        "My-PC-Hostname-03": {
+            "package_groups": [
+                "*"
+            ]
+        },
+        "My-PC-Hostname-02": {
+            "package_groups": [
+                "basic_apps",
+                "chat_tools",
+                "media_tools"
+            ]
+        }
+    },
+    "package_group_definition": {
+        "basic_apps": [
+            "Mozilla.Firefox",
+            "7zip.7zip",
+            "VideoLAN.VLC"
+        ],
+        "maintenance_tools": [
+            "Notepad++.Notepad++"
+        ],
+        "chat_tools": [
+            "Jitsi.Meet",
+            "OpenWhisperSystems.Signal"
+        ],
+        "media_tools": [
+            "Audacity.Audacity",
+            "GIMP.GIMP"
+        ]
+    }
+}
