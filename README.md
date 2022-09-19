@@ -126,9 +126,14 @@ Once `winget-up` configuration file is ready, the tool can be invoked by executi
 - `run-winget-up.bat`
 - `run-winget-up-as-admin.bat` (to run the updates/installations with Administrator privileges)
 
-TODO: Add guidelines on flags management via *.bat files
-
 ## Advanced usage
+
+By default the utility will only update the applications if they are already preinstalled on the device.  
+To install missing applications, enable the `-InstallNew` flag.
+
+To test-run the utility without applying any changes, enable the `-DryRun` flag
+
+The optional flags can be enabled either by uncommenting the relevant lines in the `*.bat` launcher files or by passing the flags directly to the internal `winget-up.ps1` utility via CLI:
 
 ```console
 Usage: winget-up.ps1 [-ConfigFile <string>] [-HostnameConfig <string>] [-PackageGroups <string[]>] [-InstallNew] [-DryRun] [-WingetUpdateFlags <string[]>]
@@ -140,12 +145,6 @@ Options:
   -InstallNew             Install missing packages (by default the update procedure will only affect pre-installed packages).
   -DryRun                 Do not apply any changes to the packages.
   -WingetUpdateFlags      Pass additional flags to `winget upgrade` command.
-```
-
-Find an application ID for usage in configuration file:
-
-```console
-winget search <application_name>
 ```
 
 ---
