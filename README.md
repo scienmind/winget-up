@@ -1,8 +1,8 @@
 # winget-up
 
-The `winget-up` utility provides a single-click solution to keep sets of software applications up to date across devices (based on native [Windows Package Manager Client](https://github.com/microsoft/winget-cli)).
+The `winget-up` utility provides a single-click solution to install and keep predefined sets of software applications up to date across devices (based on native [Windows Package Manager Client](https://github.com/microsoft/winget-cli)).
 
-The utility allows to group applications into "package groups" and define which computers shall update/install certain software packages.
+The utility allows to group applications into "package groups" and define which devices shall update/install certain software packages.
 
 ## Use case example
 
@@ -10,7 +10,7 @@ Let's say a user manages few Windows devices:
 
 - "Media PC" (hostname: `my_editing_pc`) - used for media consumption and creation, and has a set of editing and viewing software applications installed
 - "Desktop Workstation" (hostname: `my_desktop_workstation`) - main workstation, mixed use
-- "Portable Laptop" (hostname: `my_thinkpad`) - used to perform only basic tasks on the go
+- "Portable Laptop" (hostname: `my_laptop`) - used to perform only basic tasks on the go
 
 The important applications used by the devices can be organised into a few "package groups":
 
@@ -36,7 +36,14 @@ This setup translates to the following configuration:
 
 ```jsonc
 {
-    "host_config": {
+    "host_configs": {
+        "my_laptop": { // device hostname
+            "package_groups": [
+                "basic_apps", // package group name
+                "communication_apps",
+                "dev_tools"
+            ]
+        },
         "my_desktop_workstation": {
             "package_groups": [
                 "*" // select all package groups
@@ -47,18 +54,11 @@ This setup translates to the following configuration:
                 "basic_apps",
                 "editing_tools"
             ]
-        },
-        "my_thinkpad": {
-            "package_groups": [
-                "basic_apps",
-                "communication_apps",
-                "dev_tools"
-            ]
         }
     },
-    "package_group_definition": {
+    "package_group_definitions": {
         "basic_apps": [
-            "7zip.7zip",
+            "7zip.7zip", // application id
             "Mozilla.Firefox",
             "TheDocumentFoundation.LibreOffice",
             "VideoLAN.VLC"
@@ -81,15 +81,25 @@ This setup translates to the following configuration:
 ```
 
 The configuration above would be stored in `config.json` file in the `winget-up` folder alongside the scripts.
-The `winget-up` folder can then be shared/synchronized across all the devices.
 
-When running the utility the current device's hostname will be detected automatically, and the all the applications in the package groups belonging to this hostname according to the configuration will be updated.
+The `winget-up` folder, containing the tool and the unified configuration file, can then be shared/synchronized across all devices using a synchronization tool of your choice (e.g. [Syncthing](https://syncthing.net/)).
+
+When running the utility, the current device's hostname will be detected automatically, and the all the applications in the package groups belonging to this hostname according to the configuration will be updated.
+
+Alternatively, instead of configuring cross-device package groups, per-device groups can be configured as well.
 
 ---
 
+## Prerequisites
+
+- PowerShell v5.1+
+- winget v1.3+
+
+The necessary dependencies come pre-installed on Windows 11 21H2 and Windows 10 21H1 (and newer versions).
+
 ## Configuration
 
-Copy or rename the provided `config.json.example` file to `config.json` and replace it's contents with the relevant values (see the aforementioned use case example for guidance).
+Copy or rename the provided `config.json.example` file to `config.json` and replace it's contents with the relevant values (see the aforementioned use case example for config file building guidance).
 
 ### Identifying device's "hostname" string
 
@@ -126,14 +136,34 @@ Once `winget-up` configuration file is ready, the tool can be invoked by executi
 - `run-winget-up.bat`
 - `run-winget-up-as-admin.bat` (to run the updates/installations with Administrator privileges)
 
+### Legal Notice
+
+To allow unattended runs, `winget-up` utility will auto-accept the licenses and usage agreements for the sources and packages configured by the end-user on his behalf.  
+Developers of this tool are not responsible for, nor do they grant any licenses to, the third-party sources and packages.
+By using this tool you are agreeing that you have the right to use the configured packages and are agreeing with the corresponding terms of use as required by the vendors.
+
 ## Advanced usage
 
-By default the utility will only update the applications if they are already preinstalled on the device.  
+To test-run the utility without applying any changes, enable the `-DryRun` flag.
+
+By default **the utility will only update the applications which are already installed** on the device.  
 To install missing applications, enable the `-InstallNew` flag.
 
-To test-run the utility without applying any changes, enable the `-DryRun` flag
+The optional flags can be enabled by either of the following methods:
 
-The optional flags can be enabled either by uncommenting the relevant lines in the `*.bat` launcher files or by passing the flags directly to the internal `winget-up.ps1` utility via CLI:
+- uncomment the relevant lines in the `run-winget-up.bat` launcher file:
+
+```bat
+@REM !!! To enable optional flags, uncomment the the desired lines below (by removing the '@REM ' prefix):
+@REM set winget_up_flags=%winget_up_flags% -InstallNew
+@REM set winget_up_flags=%winget_up_flags% -WingetUpdateFlags \"--include-unknown\"
+@REM set winget_up_flags=%winget_up_flags% -DryRun
+@REM set winget_up_flags=%winget_up_flags% -HostnameConfig some_hostname
+@REM set winget_up_flags=%winget_up_flags% -PackageGroups some_package_group
+@REM set winget_up_flags=%winget_up_flags% -ConfigFile path_to_some_config_file
+```
+
+- pass the relevant flags directly to the internal `winget-up.ps1` utility via CLI:
 
 ```console
 Usage: winget-up.ps1 [-ConfigFile <string>] [-HostnameConfig <string>] [-PackageGroups <string[]>] [-InstallNew] [-DryRun] [-WingetUpdateFlags <string[]>]
@@ -147,6 +177,14 @@ Options:
   -WingetUpdateFlags      Pass additional flags to `winget upgrade` command.
 ```
 
+## Contributing
+
+Every contribution is welcome. I'm sure the utility can be improved in many ways.
+
+Feel free to submit a PR :)  
+Issues and bugs can be filed in the [GitHub Issue
+Tracker](https://github.com/scienmind/winget-up/issues).
+
 ---
 
-For more info about the underlying `winget` utility that made this tool possible, see [winget documentation](https://learn.microsoft.com/en-us/windows/package-manager/winget/)
+For more info about the underlying `winget` utility that made this tool possible, see [winget documentation](https://learn.microsoft.com/en-us/windows/package-manager/winget/).

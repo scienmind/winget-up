@@ -1,5 +1,12 @@
 {
-    "host_config": {
+    "host_configs": {
+        "my_laptop": { // device hostname
+            "package_groups": [
+                "basic_apps", // package group name
+                "communication_apps",
+                "dev_tools"
+            ]
+        },
         "my_desktop_workstation": {
             "package_groups": [
                 "*" // select all package groups
@@ -10,18 +17,11 @@
                 "basic_apps",
                 "editing_tools"
             ]
-        },
-        "my_thinkpad": {
-            "package_groups": [
-                "basic_apps",
-                "communication_apps",
-                "dev_tools"
-            ]
         }
     },
-    "package_group_definition": {
+    "package_group_definitions": {
         "basic_apps": [
-            "7zip.7zip",
+            "7zip.7zip", // application id
             "Mozilla.Firefox",
             "TheDocumentFoundation.LibreOffice",
             "VideoLAN.VLC"

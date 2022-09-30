@@ -1,13 +1,14 @@
 <#
-    Script description.
-    TODO: add script description
+    The winget-up utility provides a single-click solution to install and
+    keep sets of software applications up to date across devices
+    (based on native Windows Package Manager Client: winget).
 
-    Some notes.
+    The utility allows to group applications into "package groups" and 
+    define which devices shall update/install certain software packages.
 #>
-# TODO: add support for logging
 
 [CmdletBinding(PositionalBinding = $false)]
-Param (
+param (
     [Parameter(Mandatory = $false)]
     [string]$ConfigFile,
 
@@ -15,7 +16,7 @@ Param (
     [string]$HostnameConfig = (hostname),
 
     [Parameter(Mandatory = $false)]
-    [String[]]$PackageGroups,
+    [string[]]$PackageGroups,
 
     [Parameter(Mandatory = $false)]
     [switch]$InstallNew = $false,
@@ -24,7 +25,7 @@ Param (
     [switch]$DryRun = $false,
 
     [Parameter(Mandatory = $false)]
-    [String[]]$WingetUpdateFlags = ""
+    [string[]]$WingetUpdateFlags = ""
 )
 
 function UpdatePackagesFromList {
@@ -33,26 +34,31 @@ function UpdatePackagesFromList {
         [array] $PackageList,
         [bool] $InstallNew,
         [bool] $DryRun,
-        [String[]] $WingetUpdateFlags
+        [string[]] $WingetUpdateFlags
     )
-    Write-host "`nProcessing packages: "$PackageList
+    Write-Host "`nProcessing packages: "$PackageList
     foreach ($Package in $PackageList) {
-        $ListPack = winget list --exact -q $Package
-        if ([String]::Join("", $ListPack).Contains($Package)) {
-            Write-host "`nUpdating existing package: "$Package"..."
+        $ListPack = winget list --accept-source-agreements --exact -q $Package
+        if ([string]::Join("", $ListPack).Contains($Package)) {
+            Write-Host "`nUpdating existing package: "$Package"..."
             if (!$DryRun) {
-                winget upgrade --exact --silent $WingetUpdateFlags.Split() --id $Package
+                Write-Host
+                winget upgrade --exact --silent `
+                    --accept-source-agreements --accept-package-agreements `
+                    $WingetUpdateFlags.Split() --id $Package
             }
         }
         else {
             if ($InstallNew) {
-                Write-host "`nInstalling new package: "$Package"..."
+                Write-Host "`nInstalling new package: "$Package"..."
                 if (!$DryRun) {
-                    winget install --exact --silent --id $Package
+                    winget install --exact --silent `
+                        --accept-source-agreements --accept-package-agreements `
+                        --id $Package
                 }
             }
             else {
-                Write-host "`nSkipping package "$Package" (package is not installed)"
+                Write-Host "`nSkipping package: "$Package" (package is not installed)"
             }
         }  
     }
@@ -68,11 +74,11 @@ $ConfigData = (Get-Content $ConfigFile -Raw) `
     -replace '(?ms)/\*.*?\*/' | ConvertFrom-Json
 if (!$PackageGroups) {
     # select host-configured package group
-    $PackageGroups = $ConfigData.host_config.$HostnameConfig.package_groups
+    $PackageGroups = $ConfigData.host_configs.$HostnameConfig.package_groups
 }
 if ($PackageGroups -eq "*") {
     # select all groups
-    $PackageGroups = $ConfigData.package_group_definition.psobject.Properties.Name
+    $PackageGroups = $ConfigData.package_group_definitions.psobject.Properties.Name
 }
 Write-Host "Using the following parameters:" `
     "`n`tConfigFile:"$ConfigFile `
@@ -83,9 +89,9 @@ Write-Host "Using the following parameters:" `
     "`n`tWingetUpdateFlags:"$WingetUpdateFlags
 
 foreach ($PackageGroup in $PackageGroups) {
-    Write-host "`nProcessing package group:"$PackageGroup
+    Write-Host "`nProcessing package group:"$PackageGroup
     UpdatePackagesFromList `
-        -PackageList $ConfigData.package_group_definition.$PackageGroup `
+        -PackageList $ConfigData.package_group_definitions.$PackageGroup `
         -InstallNew $InstallNew `
         -DryRun $DryRun `
         -WingetUpdateFlags $WingetUpdateFlags
